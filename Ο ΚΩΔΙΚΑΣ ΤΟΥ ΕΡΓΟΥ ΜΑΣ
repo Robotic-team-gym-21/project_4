@@ -1,0 +1,112 @@
+#include <Wire.h>  
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(0x3F, 16, 2);
+
+int trigPin=A2;
+int echoPin=A1;
+int duration;
+int distance;
+
+#include<Servo.h>
+
+int servoPin1=11;
+Servo s1;
+int servoPin2=9;
+Servo s2;
+int proximitySensorPin=7;
+int waterSensor=A0;
+int waterSensorValue=0;
+
+
+
+void setup() {
+  // put your setup code here, to run once:
+s1.attach(servoPin1);
+s2.attach(servoPin2);
+pinMode(trigPin, OUTPUT);
+pinMode(echoPin, INPUT);
+pinMode(proximitySensorPin, INPUT);
+ lcd.init();
+ lcd.backlight(); 
+Serial.begin(9600);
+//s1.write(0);
+//s2.write(90);
+
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+
+digitalWrite(trigPin, LOW);
+delay(2);
+digitalWrite(trigPin, HIGH);
+delay(10);
+digitalWrite(trigPin, LOW);
+duration=pulseIn(echoPin, HIGH);
+distance=duration*0.034/2;
+
+lcd.print("Dist=");
+lcd.print(distance);
+lcd.setCursor(1,0);
+delay(500);
+lcd.clear();
+
+int metalSensorVaule=digitalRead(proximitySensorPin);  
+    //int metalSensorVaule=analogRead(proximitySensorPin); 
+int waterSensorValue = analogRead(A0);
+lcd.print("METAL=");
+lcd.print(metalSensorVaule);
+lcd.setCursor(1,0);
+delay(500);
+lcd.clear();
+  
+lcd.print("PLASTIC=");
+lcd.print(waterSensorValue);
+lcd.setCursor(1,1);
+delay(500);
+lcd.clear();
+//delay(1000);
+
+
+if (distance>=7){s1.write(0);}
+      
+else  if (distance>=1 &  metalSensorVaule == 1)//for metal
+    {
+      s1.write(180);
+      delay(1000);
+      s2.write(145);
+      delay(500);
+      s2.write(90);
+      s1.write(180);
+      delay(1000);
+      s1.write(0);
+      s2.write(90);
+    }
+ else if (distance<6 & waterSensorValue<680 & metalSensorVaule == 0 )//for paper
+    {s1.write(0);
+      delay(1000);
+      
+      s2.write(145);
+      delay(500);
+      s2.write(90);
+      s1.write(0);
+      delay(300);
+      s1.write(0);
+     
+     }
+  else  if (distance<6& waterSensorValue>680 & metalSensorVaule == 0 )//for plastic
+    {s1.write(90);
+      delay(2000);
+      s2.write(145);  
+      delay(500);
+      s2.write(90);
+      s1.write(45);
+      delay(300);
+      s1.write(0);
+      
+      }     
+    else if (distance>=7){ s1.write(0);
+      
+      }
+     }
+   
